@@ -32,7 +32,8 @@ body {
   font-family: var(--font-family);
   background-color: #090e11;
   color: var(--text-primary);
-  height: 100vh;
+  height: 100dvh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -173,7 +174,7 @@ body {
 /* App Container */
 .app-container {
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   max-width: 1600px;
   max-height: 960px;
   display: flex;
@@ -582,24 +583,99 @@ body {
 
 /* Responsividade Mobile */
 @media (max-width: 768px) {
+  body {
+    padding: 0;
+  }
+
+  .app-container {
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    border: none;
+  }
+
   .mobile-only {
     display: flex;
   }
 
   .sidebar {
-    position: absolute;
+    position: fixed;
     inset: 0 auto 0 0;
-    width: 280px;
-    z-index: 50;
+    width: 82%;
+    max-width: 320px;
+    z-index: 100;
     transform: translateX(-100%);
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.7);
   }
 
   .sidebar.active {
     transform: translateX(0);
   }
 
+  .chat-area {
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    padding: 0 10px;
+    gap: 8px;
+    height: 56px;
+    min-height: 56px;
+    flex-shrink: 0;
+  }
+
+  .group-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .group-info {
+    cursor: pointer;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .group-info h2 {
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .group-info p {
+    font-size: 0.76rem;
+    color: var(--accent-green);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .messages-container {
+    padding: 12px 10px;
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .message-bubble {
-    max-width: 85%;
+    max-width: 88%;
+    font-size: 0.9rem;
+  }
+
+  .chat-footer {
+    min-height: 56px;
+    padding: 8px 10px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    flex-shrink: 0;
+  }
+
+  .message-form input {
+    font-size: 16px; /* Evita zoom automático no iOS Safari */
+    padding: 10px 14px;
   }
 }

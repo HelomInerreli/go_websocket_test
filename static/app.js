@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchUsers = document.getElementById('search-users');
   const onlineCounterBadge = document.getElementById('online-counter-badge');
   const chatSubtitle = document.getElementById('chat-subtitle');
+  const groupInfoHeader = document.getElementById('group-info-header');
 
   const messagesContainer = document.getElementById('messages-container');
   const messageForm = document.getElementById('message-form');
@@ -297,10 +298,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Mobile menu toggle
-  toggleSidebarBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('active');
+  // Mobile menu toggle (pelo botão ou pelo cabeçalho do grupo)
+  if (toggleSidebarBtn) {
+    toggleSidebarBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+  }
+
+  if (groupInfoHeader) {
+    groupInfoHeader.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('active');
+      }
+    });
+  }
+
+  // Ajustar scroll automaticamente quando o teclado virtual abre no mobile
+  messageInput.addEventListener('focus', () => {
+    setTimeout(scrollToBottom, 300);
   });
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      scrollToBottom();
+    });
+  }
 
   // Fechar sidebar ao clicar fora em telas pequenas
   messagesContainer.addEventListener('click', () => {
