@@ -42,57 +42,66 @@ func (h *Hub) run() {
 			h.mu.Unlock()
 
 			// Notificar todos que um novo utilizador entrou
-			joinMsg := Message{
+			h.broadcastToAll(Message{
 				Type:      "join",
 				Sender:    client.username,
 				Color:     client.color,
 				Timestamp: time.Now().Format("15:04"),
-			}
-			h.broadcastMessage(joinMsg)
+			})
 
 			// Enviar lista atualizada de utilizadores
-			h.broadcastUserList()
+			h.sendUserList()
 
 		case client := <-h.unregister:
+			username := client.username
 			h.mu.Lock()
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
-
-				// Notificar que o utilizador saiu
-				leaveMsg := Message{
-					Type:      "leave",
-					Sender:    client.username,
-					Timestamp: time.Now().Format("15:04"),
-				}
-				h.broadcastMessage(leaveMsg)
 			}
 			h.mu.Unlock()
 
+			// Notificar que o utilizador saiu (sem segurar o mutex para evitar deadlock)
+			h.broadcastToAll(Message{
+				Type:      "leave",
+				Sender:    username,
+				Timestamp: time.Now().Format("15:04"),
+			})
+
 			// Enviar lista atualizada de utilizadores
-			h.broadcastUserList()
+			h.sendUserList()
 
 		case message := <-h.broadcast:
-			h.broadcastMessage(message)
+			h.broadcastToAll(message)
 		}
 	}
 }
 
-func (h *Hub) broadcastMessage(message Message) {
+func (h *Hub) broadcastToAll(message Message) {
 	h.mu.RLock()
-	defer h.mu.RUnlock()
-
+	// Criar cópia da lista de clientes para iterar com segurança
+	clients := make([]*Client, 0, len(h.clients))
 	for client := range h.clients {
+		clients = append(clients, client)
+	}
+	h.mu.RUnlock()
+
+	for _, client := range clients {
 		select {
 		case client.send <- message:
 		default:
-			close(client.send)
-			delete(h.clients, client)
+			// Se o canal do cliente estiver cheio ou fechado, remove com segurança
+			h.mu.Lock()
+			if _, ok := h.clients[client]; ok {
+				delete(h.clients, client)
+				close(client.send)
+			}
+			h.mu.Unlock()
 		}
 	}
 }
 
-func (h *Hub) broadcastUserList() {
+func (h *Hub) sendUserList() {
 	h.mu.RLock()
 	users := make([]string, 0, len(h.clients))
 	for client := range h.clients {
@@ -105,5 +114,5 @@ func (h *Hub) broadcastUserList() {
 		Users: users,
 	}
 
-	h.broadcastMessage(userListMsg)
+	h.broadcastToAll(userListMsg)
 }
