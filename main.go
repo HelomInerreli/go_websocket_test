@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -18,8 +19,15 @@ func main() {
 		serveWs(hub, w, r)
 	})
 
-	port := ":8080"
-	log.Printf("Servidor de Chat WebSocket a rodar em http://localhost%s", port)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	if port[0] != ':' {
+		port = ":" + port
+	}
+
+	log.Printf("Servidor de Chat WebSocket a rodar na porta %s", port)
 	err := http.ListenAndServe(port, nil)
 	if err != nil {
 		log.Fatalf("Erro ao iniciar servidor: %v", err)
