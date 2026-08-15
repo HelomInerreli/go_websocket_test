@@ -81,6 +81,13 @@ func (c *Client) readPump() {
 			break
 		}
 
+		// Trata pedido de limpar histórico
+		if msg.Type == "clear_history" {
+			msg.Sender = c.username
+			c.hub.broadcast <- msg
+			continue
+		}
+
 		// Sanitizar e processar mensagem
 		content := strings.TrimSpace(msg.Content)
 		if content != "" {

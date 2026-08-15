@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const messageForm = document.getElementById('message-form');
   const messageInput = document.getElementById('message-input');
   const logoutBtn = document.getElementById('logout-btn');
+  const clearHistoryBtn = document.getElementById('clear-history-btn');
 
   let ws = null;
   let currentUsername = '';
@@ -110,6 +111,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Processa mensagens recebidas do servidor
   function handleIncomingMessage(msg) {
     switch (msg.type) {
+      case 'history':
+        if (msg.history && Array.isArray(msg.history)) {
+          msg.history.forEach(item => handleIncomingMessage(item));
+        }
+        break;
+
       case 'message':
         renderChatMessage(msg);
         break;
@@ -124,6 +131,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (msg.sender !== currentUsername) {
           appendSystemMessage(`${msg.sender} saiu da sala`);
         }
+        break;
+
+      case 'history_cleared':
+        messagesContainer.innerHTML = `
+          <div class="system-date-divider">
+            <span>HOJE</span>
+          </div>
+        `;
+        appendSystemMessage(`${msg.sender || 'Um participante'} apagou todo o histórico da conversa`);
         break;
 
       case 'user_list':
@@ -270,6 +286,15 @@ document.addEventListener('DOMContentLoaded', () => {
     usernameInput.value = '';
     avatarPreview.textContent = '?';
     avatarPreview.style.backgroundColor = '#00a884';
+  });
+
+  // Botão de Apagar Histórico da Sala
+  clearHistoryBtn.addEventListener('click', () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    const confirmClear = confirm('Tem a certeza que deseja apagar todo o histórico de mensagens para todos no grupo?');
+    if (confirmClear) {
+      ws.send(JSON.stringify({ type: 'clear_history' }));
+    }
   });
 
   // Mobile menu toggle

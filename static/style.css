@@ -369,6 +369,9 @@ body {
 
 .header-actions {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .icon-btn {
@@ -387,6 +390,11 @@ body {
 .icon-btn:hover {
   background-color: rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
+}
+
+.icon-btn.warning:hover {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
 }
 
 .icon-btn.danger:hover {
